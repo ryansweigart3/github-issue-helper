@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GitHub Issues CLI - Create GitHub issues from CSV files
+Tissue - Create GitHub issues from CSV files
 
 A command-line tool that reads issue data from CSV files and creates
 corresponding issues in GitHub repositories.
@@ -146,7 +146,7 @@ def determine_exit_code(result: BatchResult) -> int:
     is_flag=True,
     help='Suppress all output except errors and final summary'
 )
-@click.version_option(version='1.0.0', prog_name='github-issues-cli')
+@click.version_option(version='1.0.0', prog_name='tissue')
 def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
     """
     Create GitHub issues from CSV file data.
@@ -157,7 +157,7 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
     
     Example usage:
     
-        github-issues-cli --file issues.csv --repo myorg/myproject --token ghp_xxx
+        tissue --file issues.csv --repo myorg/myproject --token ghp_xxx
     
     The CSV file should have flexible column headers like:
     - issue title, title, or summary (required)
@@ -176,7 +176,7 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
         click.echo("Error: --quiet and --verbose cannot be used together", err=True)
         sys.exit(1)
     
-    log_verbose("Starting github-issues-cli")
+    log_verbose("Starting tissue")
     log_verbose(f"File: {file}")
     log_verbose(f"Repository: {repo}")
     log_verbose(f"Token: {'*' * (len(token) - 4)}{token[-4:] if len(token) > 4 else '***'}")
@@ -284,8 +284,4 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
 
 if __name__ == '__main__':
     main()
-
-
-
-
 

@@ -259,7 +259,7 @@ class GitHubClient:
                     new_label = self.repo.create_label(
                         name=label,
                         color="0075ca",  # Default blue color
-                        description=f"Label created automatically by github-issues-cli"
+                        description=f"Label created automatically by tissue"
                     )
                     valid_labels.append(new_label.name)
                     # Update cache
@@ -314,3 +314,4 @@ if __name__ == "__main__":
     #     result = client.create_issues_batch(issues)
     #     client.print_summary(result)
     pass
+
