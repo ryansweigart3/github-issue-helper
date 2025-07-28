@@ -1,0 +1,6 @@
+click
+PyGithub
+pandas
+python-dotenv
+colorama
+
