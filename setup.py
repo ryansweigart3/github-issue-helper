@@ -31,17 +31,17 @@ def read_requirements():
     return requirements
 
 setup(
-    name="github-issues-cli",
+    name="tissue",
     version="1.0.0",
     author="Ryan Sweigart",  # Replace with your name
     author_email="coffeedatadev@gmail.com",  # Replace with your email
     description="A CLI tool for creating GitHub issues from CSV files",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/ryansweigart3/github-issue-helper",  # Replace with your repo URL
+    url="https://github.com/ryansweigart3/tissue",  # Replace with your repo URL
     project_urls={
-        "Bug Reports": "https://github.com/ryansweigart3/github-issue-helper/issues",
-        "Source": "https://github.com/ryansweigart3/github-issue-helper",
+        "Bug Reports": "https://github.com/ryansweigart3/tissue/issues",
+        "Source": "https://github.com/ryansweigart3/tissue",
     },
     packages=find_packages(),
     classifiers=[
@@ -76,21 +76,13 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "github-issues-cli=src.main:main",
+            "tissue=src.main:main",
         ],
     },
     include_package_data=True,
     zip_safe=False,
-    keywords="github issues csv cli automation",
+    keywords="github issues csv cli automation tissue",
 )
-
-
-
-
-
-
-
-
 
 
 
