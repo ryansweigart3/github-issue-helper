@@ -20,7 +20,7 @@ The easiest way to install Tissue without dependency conflicts:
 
 **On macOS/Linux:**
 ```bash
-git clone https://github.com/yourusername/tissue.git
+git clone https://github.com/ryansweigart3/tissue.git
 cd tissue
 chmod +x install.sh
 ./install.sh
@@ -28,7 +28,7 @@ chmod +x install.sh
 
 **On Windows:**
 ```batch
-git clone https://github.com/yourusername/tissue.git
+git clone https://github.com/ryansweigart3/tissue.git
 cd tissue
 install.bat
 ```
@@ -38,7 +38,7 @@ install.bat
 If you prefer to install manually:
 
 ```bash
-git clone https://github.com/yourusername/tissue.git
+git clone https://github.com/ryansweigart3/tissue.git
 cd tissue
 
 # Create clean virtual environment
@@ -107,7 +107,7 @@ Tissue accepts flexible CSV formats. The following column names are supported:
 | Title | `issue title`, `title`, `issue`, `summary`, `name` | ✅ | The issue title |
 | Description | `description`, `desc`, `details`, `body`, `content` | ✅ | The issue description/body |
 | Assignee | `assignee`, `assigned to`, `owner`, `responsible` | ❌ | GitHub username to assign |
-| Labels | `label`, `labels`, `tags`, `category`, `type` | ❌ | Labels (comma/semicolon/pipe separated) |
+| Labels | `label`, `labels`, `tags`, `category`, `type` | ❌ | Labels (semicolon/pipe separated) |
 
 ### Example CSV
 
@@ -115,7 +115,7 @@ Tissue accepts flexible CSV formats. The following column names are supported:
 issue title,description,assignee,label
 Fix login bug,Users can't log in with special characters,john_doe,bug;high-priority
 Add dark mode,Implement dark theme for better UX,jane_smith,enhancement
-Update docs,Fix typos in README,,documentation,low-priority
+Update docs,Fix typos in README,,documentation|low-priority
 ```
 
 ## Usage
