@@ -17,7 +17,7 @@ A command-line tool for creating GitHub issues from CSV files. Tissue makes it e
 ### From Source
 
 ```bash
-git clone https://github.com/yourusername/tissue.git
+git clone https://github.com/ryansweigart3/tissue.git
 cd tissue
 pip install -e .
 ```
