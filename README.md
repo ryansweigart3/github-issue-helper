@@ -1,6 +1,6 @@
-# Tissue
+# Tissue 
 
-A command-line tool for creating GitHub issues within the terminal (hence T(erminal)issue) from CSV files. Tissue makes it easy to bulk-import issues, feature requests, and bug reports into your GitHub repositories.
+Welcome to Terminal Issues (aka Tissue!) A command-line tool for creating GitHub issues from CSV files. Tissue makes it easy to bulk-import issues, feature requests, and bug reports into your GitHub repositories.
 
 ## Features
 
@@ -14,18 +14,74 @@ A command-line tool for creating GitHub issues within the terminal (hence T(ermi
 
 ## Installation
 
-### From Source
+### Recommended: Use the Installation Script
+
+The easiest way to install Tissue without dependency conflicts:
+
+**On macOS/Linux:**
+```bash
+git clone https://github.com/yourusername/tissue.git
+cd tissue
+chmod +x install.sh
+./install.sh
+```
+
+**On Windows:**
+```batch
+git clone https://github.com/yourusername/tissue.git
+cd tissue
+install.bat
+```
+
+### Manual Installation
+
+If you prefer to install manually:
 
 ```bash
-git clone https://github.com/ryansweigart3/tissue.git
+git clone https://github.com/yourusername/tissue.git
 cd tissue
+
+# Create clean virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Remove any conflicting packages
+pip uninstall -y github PyGithub
+
+# Install dependencies explicitly
+pip install "PyGithub>=1.58.0" "click>=8.0.0" "pandas>=1.5.0"
+
+# Install tissue
 pip install -e .
 ```
 
-### Using pip (when published)
+### Verify Installation
+
+Run the installation checker to ensure everything is working:
 
 ```bash
-pip install tissue
+python scripts/check_installation.py
+```
+
+### Common Installation Issues
+
+**Issue: `cannot import name 'Github' from 'github'`**
+
+This happens when the wrong `github` package is installed. The installation scripts prevent this, but if installing manually:
+
+```bash
+pip uninstall -y github PyGithub
+pip install "PyGithub>=1.58.0"
+```
+
+**Issue: Package conflicts with system Python**
+
+Always use a virtual environment:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+# Then install as above
 ```
 
 ## Quick Start
@@ -35,7 +91,11 @@ pip install tissue
 3. **Run tissue**:
 
 ```bash
+# Method 1: Direct command (if in PATH)
 tissue --file issues.csv --repo owner/repository --token ghp_your_token_here
+
+# Method 2: Python module (always works)
+python -m src.main --file issues.csv --repo owner/repository --token ghp_your_token_here
 ```
 
 ## CSV Format
@@ -83,16 +143,22 @@ tissue --file issues.csv --repo myorg/myproject --token ghp_xxxxxxxxxxxx
 **Verbose output:**
 ```bash
 tissue -f issues.csv -r myorg/myproject -t ghp_xxx --verbose
+# OR
+python -m src.main -f issues.csv -r myorg/myproject -t ghp_xxx --verbose
 ```
 
 **Quiet mode:**
 ```bash
 tissue -f issues.csv -r myorg/myproject -t ghp_xxx --quiet
+# OR  
+python -m src.main -f issues.csv -r myorg/myproject -t ghp_xxx --quiet
 ```
 
 **Get help:**
 ```bash
 tissue --help
+# OR
+python -m src.main --help
 ```
 
 ## GitHub Token Setup
