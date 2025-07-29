@@ -1,6 +1,6 @@
 # Tissue
 
-A command-line tool for creating GitHub issues from CSV files. Tissue makes it easy to bulk-import issues, feature requests, and bug reports into your GitHub repositories.
+A command-line tool for creating GitHub issues within the terminal (hence T(erminal)issue) from CSV files. Tissue makes it easy to bulk-import issues, feature requests, and bug reports into your GitHub repositories.
 
 ## Features
 
