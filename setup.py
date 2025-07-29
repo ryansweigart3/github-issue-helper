@@ -28,20 +28,34 @@ def read_requirements():
                     if '#' in line:
                         line = line.split('#')[0].strip()
                     requirements.append(line)
+    
+    # Ensure PyGithub is explicitly listed to avoid naming conflicts
+    core_requirements = [
+        "PyGithub>=1.58.0",
+        "click>=8.0.0", 
+        "pandas>=1.5.0"
+    ]
+    
+    # Add core requirements if not already present
+    for req in core_requirements:
+        package_name = req.split('>=')[0].split('==')[0]
+        if not any(package_name in existing_req for existing_req in requirements):
+            requirements.append(req)
+    
     return requirements
 
 setup(
     name="tissue",
     version="1.0.0",
-    author="Ryan Sweigart",  # Replace with your name
-    author_email="coffeedatadev@gmail.com",  # Replace with your email
+    author="Your Name",  # Replace with your name
+    author_email="your.email@example.com",  # Replace with your email
     description="A CLI tool for creating GitHub issues from CSV files",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/ryansweigart3/tissue",  # Replace with your repo URL
+    url="https://github.com/yourusername/tissue",  # Replace with your repo URL
     project_urls={
-        "Bug Reports": "https://github.com/ryansweigart3/tissue/issues",
-        "Source": "https://github.com/ryansweigart3/tissue",
+        "Bug Reports": "https://github.com/yourusername/tissue/issues",
+        "Source": "https://github.com/yourusername/tissue",
     },
     packages=find_packages(),
     classifiers=[
@@ -83,8 +97,4 @@ setup(
     zip_safe=False,
     keywords="github issues csv cli automation tissue",
 )
-
-
-
-
 

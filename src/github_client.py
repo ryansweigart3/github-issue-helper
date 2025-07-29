@@ -1,9 +1,20 @@
 import time
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
-from github import Github, GithubException
-from github.Repository import Repository
-from github.Issue import Issue
+
+# Import PyGithub with error handling for common installation issues
+try:
+    from github import Github, GithubException
+    from github.Repository import Repository
+    from github.Issue import Issue
+except ImportError as e:
+    print("Error: PyGithub package not found or incorrect 'github' package installed.")
+    print("Please install the correct package:")
+    print("  pip uninstall github")
+    print("  pip install PyGithub")
+    print(f"Original error: {e}")
+    raise ImportError("PyGithub package required. Run: pip install PyGithub") from e
+
 from src.csv_parser import IssueData
 
 

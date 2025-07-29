@@ -1,7 +1,13 @@
 import unittest
 from unittest.mock import Mock, patch, MagicMock
 import pytest
-from github import GithubException
+
+# Import PyGithub with error handling
+try:
+    from github import GithubException
+except ImportError as e:
+    print("Error: PyGithub package not found. Please install: pip install PyGithub")
+    raise ImportError("PyGithub package required for tests") from e
 
 from src.github_client import GitHubClient, IssueCreationResult, BatchResult
 from src.csv_parser import IssueData
@@ -442,3 +448,4 @@ class TestBatchResult(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+
