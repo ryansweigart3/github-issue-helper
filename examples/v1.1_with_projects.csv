@@ -1,0 +1,9 @@
+issue title,description,assignee,label,status,priority,size,sprint
+Fix authentication bug,Users cannot log in with special characters in passwords. Critical security issue affecting 15% of users.,ryansweigart3,bug;critical,In Progress,High,Large,Sprint 23
+Add user dashboard,Create a personalized dashboard showing user activity and recent projects. Requested by 80% of beta users.,ryansweigart3,enhancement;dashboard,Todo,Medium,Medium,Sprint 24
+Update API documentation,API docs are outdated and missing v2 endpoint examples. Blocking external developer adoption.,ryansweigart3,documentation,Todo,Low,Small,Sprint 24
+Performance optimization,Search queries timeout after 3 seconds with large datasets. Need database indexing improvements.,ryansweigart3,performance;bug,In Progress,High,Large,Sprint 23
+Mobile app responsive layout,Mobile navigation breaks on screens < 768px. Elements overlap and become unusable on phones.,ryansweigart3,bug;mobile;ui,In Review,Medium,Medium,Sprint 23
+User profile pictures,Allow users to upload profile pictures with size limits and format validation (PNG/JPG/GIF).,ryansweigart3,feature;user-experience,Backlog,Low,Small,Sprint 25
+Data export functionality,Users need to export their data in CSV and PDF formats for compliance with data portability regulations.,ryansweigart3,feature;compliance,Backlog,Medium,Medium,Sprint 25
+Two-factor authentication,Implement 2FA using TOTP and SMS backup for enhanced account security. Required for enterprise customers.,ryansweigart3,security;authentication,Todo,High,Large,Sprint 24
