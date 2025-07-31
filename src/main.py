@@ -137,6 +137,10 @@ def determine_exit_code(result: BatchResult) -> int:
     help='GitHub personal access token'
 )
 @click.option(
+    '--project', '-p',
+    help='GitHub project name to add issues to (optional)'
+)
+@click.option(
     '--verbose', '-v',
     is_flag=True,
     help='Enable verbose output showing detailed progress'
@@ -147,7 +151,7 @@ def determine_exit_code(result: BatchResult) -> int:
     help='Suppress all output except errors and final summary'
 )
 @click.version_option(version='1.0.0', prog_name='tissue')
-def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
+def main(file: str, repo: str, token: str, project: Optional[str], verbose: bool, quiet: bool) -> None:
     """
     Create GitHub issues from CSV file data.
     
@@ -158,12 +162,20 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
     Example usage:
     
         tissue --file issues.csv --repo myorg/myproject --token ghp_xxx
+        
+        # With GitHub Projects integration (v1.1)
+        tissue --file issues.csv --repo myorg/myproject --token ghp_xxx --project "Sprint Planning"
     
     The CSV file should have flexible column headers like:
     - issue title, title, or summary (required)
     - description, desc, or details (required) 
     - assignee, assigned to, or owner (optional)
     - label, labels, or tags (optional)
+    
+    New in v1.1 - GitHub Projects integration:
+    - status, column, or project_status (optional) - Project column/status
+    - priority, pri, or importance (optional) - Issue priority
+    - Any custom fields that match your project's custom fields
     """
     global VERBOSE, QUIET
     
@@ -180,6 +192,7 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
     log_verbose(f"File: {file}")
     log_verbose(f"Repository: {repo}")
     log_verbose(f"Token: {'*' * (len(token) - 4)}{token[-4:] if len(token) > 4 else '***'}")
+    log_verbose(f"Project: {project or 'None (issues only)'}")
     
     # Validate inputs
     log_verbose("Validating inputs...")
@@ -239,7 +252,10 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
         sys.exit(1)
     
     # Create issues
-    log_info(f"Creating {len(issues)} issues in {repo}...")
+    if project:
+        log_info(f"Creating {len(issues)} issues in {repo} and adding to project '{project}'...")
+    else:
+        log_info(f"Creating {len(issues)} issues in {repo}...")
     
     try:
         # Redirect GitHub client output if in quiet mode
@@ -250,9 +266,9 @@ def main(file: str, repo: str, token: str, verbose: bool, quiet: bool) -> None:
             
             captured_output = io.StringIO()
             with redirect_stdout(captured_output), redirect_stderr(captured_output):
-                result = client.create_issues_batch(issues)
+                result = client.create_issues_batch(issues, project)
         else:
-            result = client.create_issues_batch(issues)
+            result = client.create_issues_batch(issues, project)
         
         log_verbose("Batch issue creation completed")
         
