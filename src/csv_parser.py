@@ -12,9 +12,16 @@ class IssueData:
     assignee: Optional[str] = None
     labels: List[str] = None
     
+    # New v1.1 fields for project integration
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    custom_fields: Dict[str, str] = None
+    
     def __post_init__(self):
         if self.labels is None:
             self.labels = []
+        if self.custom_fields is None:
+            self.custom_fields = {}
 
 
 class CSVParser:
@@ -25,7 +32,10 @@ class CSVParser:
         'title': ['issue title', 'title', 'issue', 'summary', 'name'],
         'description': ['description', 'desc', 'details', 'body', 'content'],
         'assignee': ['assignee', 'assigned to', 'owner', 'responsible'],
-        'labels': ['label', 'labels', 'tags', 'category', 'type']
+        'labels': ['label', 'labels', 'tags', 'category', 'type'],
+        # New v1.1 project-related mappings
+        'status': ['status', 'column', 'project_status', 'state', 'project_column'],
+        'priority': ['priority', 'pri', 'importance', 'severity'],
     }
     
     def __init__(self, csv_file_path: str):
@@ -112,11 +122,26 @@ class CSVParser:
             labels_raw = self._get_field_value(row, 'labels')
             labels = self._parse_labels(labels_raw)
             
+            # Get new v1.1 project fields
+            status = self._get_field_value(row, 'status')
+            if status and status.strip() == '':
+                status = None
+                
+            priority = self._get_field_value(row, 'priority')
+            if priority and priority.strip() == '':
+                priority = None
+            
+            # Extract custom fields (any columns not in standard mappings)
+            custom_fields = self._extract_custom_fields(row)
+            
             return IssueData(
                 title=title.strip(),
                 description=description.strip(),
                 assignee=assignee.strip() if assignee else None,
-                labels=labels
+                labels=labels,
+                status=status.strip() if status else None,
+                priority=priority.strip() if priority else None,
+                custom_fields=custom_fields
             )
             
         except Exception as e:
@@ -154,6 +179,29 @@ class CSVParser:
         
         return cleaned_labels
     
+    def _extract_custom_fields(self, row: pd.Series) -> Dict[str, str]:
+        """Extract custom fields not covered by standard mappings"""
+        custom_fields = {}
+        
+        # Get all known standard field column names
+        known_columns = set()
+        for field_mappings in self.COLUMN_MAPPINGS.values():
+            known_columns.update(field_mappings)
+        
+        # Add the actual mapped column names
+        known_columns.update(self.column_map.values())
+        
+        # Find columns that aren't standard fields
+        for column_name in self.df.columns:
+            if column_name not in known_columns:
+                value = row.get(column_name, '')
+                if pd.notna(value) and str(value).strip():
+                    # Convert column name to more readable format
+                    field_name = column_name.replace('_', ' ').title()
+                    custom_fields[field_name] = str(value).strip()
+        
+        return custom_fields
+    
     def get_column_mapping_info(self) -> Dict[str, str]:
         """Return information about how columns were mapped"""
         return self.column_map.copy()
@@ -184,3 +232,5 @@ if __name__ == "__main__":
     #     print(f"Labels: {issue.labels}")
     #     print("-" * 40)
     pass
+
+

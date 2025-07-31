@@ -15,7 +15,8 @@ except ImportError as e:
     print(f"Original error: {e}")
     raise ImportError("PyGithub package required. Run: pip install PyGithub") from e
 
-from src.csv_parser import IssueData
+from .csv_parser import IssueData
+from .projects_client import GitHubProjectsClient, ProjectInfo
 
 
 @dataclass
@@ -40,7 +41,7 @@ class BatchResult:
 
 
 class GitHubClient:
-    """GitHub client for creating issues from CSV data"""
+    """GitHub client for creating issues from CSV data with Projects v2 support"""
     
     def __init__(self, token: str, repo_name: str):
         """
@@ -54,6 +55,7 @@ class GitHubClient:
         self.repo_name = repo_name
         self.github = None
         self.repo = None
+        self.projects_client = None
         self._existing_issues_cache = None
         self._existing_labels_cache = None
         
@@ -75,6 +77,9 @@ class GitHubClient:
             self.repo = self.github.get_repo(self.repo_name)
             print(f"Repository: {self.repo.full_name}")
             
+            # Initialize Projects client
+            self.projects_client = GitHubProjectsClient(self.github, self.repo, self.token)
+            
             return True
             
         except GithubException as e:
@@ -89,12 +94,13 @@ class GitHubClient:
             print(f"Unexpected error connecting to GitHub: {str(e)}")
             return False
     
-    def create_issues_batch(self, issues: List[IssueData]) -> BatchResult:
+    def create_issues_batch(self, issues: List[IssueData], project_name: Optional[str] = None) -> BatchResult:
         """
-        Create multiple issues from IssueData objects
+        Create multiple issues from IssueData objects with optional project integration
         
         Args:
             issues: List of IssueData objects to create
+            project_name: Optional project name to add issues to
             
         Returns:
             BatchResult: Summary of the operation
@@ -103,6 +109,11 @@ class GitHubClient:
             raise RuntimeError("Must call connect() successfully before creating issues")
         
         print(f"Starting batch creation of {len(issues)} issues...")
+        
+        # Handle project integration
+        project_info = None
+        if project_name:
+            project_info = self._setup_project_integration(project_name)
         
         # Cache existing issues and labels for efficiency
         self._cache_existing_issues()
@@ -116,7 +127,7 @@ class GitHubClient:
         for i, issue_data in enumerate(issues, 1):
             print(f"Processing issue {i}/{len(issues)}: {issue_data.title}")
             
-            result = self._create_single_issue(issue_data)
+            result = self._create_single_issue(issue_data, project_info)
             results.append(result)
             
             if result.success:
@@ -140,8 +151,8 @@ class GitHubClient:
             results=results
         )
     
-    def _create_single_issue(self, issue_data: IssueData) -> IssueCreationResult:
-        """Create a single issue and return the result"""
+    def _create_single_issue(self, issue_data: IssueData, project_info: Optional[ProjectInfo] = None) -> IssueCreationResult:
+        """Create a single issue and optionally add to project"""
         try:
             # Check for duplicate title
             if self._issue_title_exists(issue_data.title):
@@ -166,6 +177,10 @@ class GitHubClient:
                 labels=labels
             )
             
+            # Handle project integration if specified
+            if project_info:
+                self._add_issue_to_project(issue, issue_data, project_info)
+            
             return IssueCreationResult(
                 success=True,
                 issue_data=issue_data,
@@ -185,6 +200,72 @@ class GitHubClient:
                 issue_data=issue_data,
                 error_message=f"Unexpected error: {str(e)}"
             )
+    
+    def _setup_project_integration(self, project_name: str) -> Optional[ProjectInfo]:
+        """Set up project integration and validate project exists"""
+        try:
+            print(f"Setting up project integration with '{project_name}'...")
+            
+            project = self.projects_client.find_project_by_name(project_name)
+            
+            if not project:
+                print(f"⚠️  Project '{project_name}' not found. Issues will be created without project integration.")
+                available_projects = self.projects_client.get_projects()
+                if available_projects:
+                    project_names = [p.title for p in available_projects]
+                    print(f"   Available projects: {', '.join(project_names)}")
+                return None
+            
+            print(f"✓ Found project: {project.title}")
+            
+            # Print project information in verbose mode
+            if hasattr(self, '_verbose') and self._verbose:
+                self.projects_client.print_project_info(project)
+            
+            return project
+            
+        except Exception as e:
+            print(f"⚠️  Could not set up project integration: {str(e)}")
+            return None
+    
+    def _add_issue_to_project(self, issue: Issue, issue_data: IssueData, project_info: ProjectInfo) -> None:
+        """Add an issue to a project with status and custom fields"""
+        try:
+            # Determine status - use from CSV or default
+            status = issue_data.status
+            if not status:
+                status = self.projects_client.get_default_status(project_info)
+            
+            # Prepare custom fields
+            custom_fields = {}
+            
+            # Add priority if specified
+            if issue_data.priority:
+                custom_fields['Priority'] = issue_data.priority
+            
+            # Add any other custom fields from CSV
+            custom_fields.update(issue_data.custom_fields)
+            
+            # Validate fields before adding
+            is_valid, errors = self.projects_client.validate_project_fields(
+                project_info, status, custom_fields
+            )
+            
+            if errors:
+                for error in errors:
+                    print(f"    ⚠️  {error}")
+                print("    → Proceeding with valid fields only")
+            
+            # Add to project
+            success = self.projects_client.add_issue_to_project(
+                project_info, issue, status, custom_fields
+            )
+            
+            if not success:
+                print("    ⚠️  Could not add issue to project")
+                
+        except Exception as e:
+            print(f"    ⚠️  Project integration failed: {str(e)}")
     
     def _cache_existing_issues(self) -> None:
         """Cache existing issue titles for duplicate checking"""
@@ -287,6 +368,12 @@ class GitHubClient:
         
         return valid_labels
     
+    def get_available_projects(self) -> List[ProjectInfo]:
+        """Get list of available projects for the repository"""
+        if not self.projects_client:
+            return []
+        return self.projects_client.get_projects()
+    
     def print_summary(self, result: BatchResult) -> None:
         """Print a formatted summary of the batch operation"""
         print("\n" + "="*60)
@@ -322,7 +409,9 @@ if __name__ == "__main__":
     # client = GitHubClient("your_token", "owner/repo")
     # if client.connect():
     #     issues = [...]  # from CSV parser
-    #     result = client.create_issues_batch(issues)
+    #     result = client.create_issues_batch(issues, "My Project")
     #     client.print_summary(result)
     pass
+
+
 
